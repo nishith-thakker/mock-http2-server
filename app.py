@@ -1,6 +1,10 @@
 from flask import Flask, request, jsonify, abort
+import logging
 
 app = Flask(__name__)
+
+# Setup basic logging
+logging.basicConfig(level=logging.INFO)
 
 # ✅ Allow only GET and POST
 @app.before_request
@@ -11,6 +15,12 @@ def limit_methods():
 # ✅ Defined endpoint
 @app.route("/profile/status", methods=["GET", "POST"])
 def profile_status():
+    if request.method == "POST":
+        # Log method, path, headers, and body
+        logging.info(f"POST request received:")
+        logging.info(f"Path: {request.path}")
+        logging.info(f"Headers: {dict(request.headers)}")
+        logging.info(f"Body: {request.get_data(as_text=True)}")
     return jsonify({"message": "OK"}), 200
 
 # ✅ Undefined routes → 404
@@ -24,5 +34,4 @@ def method_not_allowed(e):
     return jsonify({"error": "Method Not Allowed"}), 405
 
 if __name__ == "__main__":
-    # Normally you'd use `flask run`, but here we will run via Hypercorn for HTTP/2
     app.run()
